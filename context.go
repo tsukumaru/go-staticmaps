@@ -38,6 +38,7 @@ type Context struct {
 	paths   []*Path
 	areas   []*Area
 	circles []*Circle
+	icons   []*Icon
 
 	userAgent    string
 	tileProvider *TileProvider
@@ -136,6 +137,16 @@ func (m *Context) ClearCircles() {
 	m.circles = nil
 }
 
+// AddIcon adds an icon to the Context
+func (m *Context) AddIcon(icon *Icon) {
+	m.icons = append(m.icons, icon)
+}
+
+// ClearIcons removes all icons from the Context
+func (m *Context) ClearIcons() {
+	m.icons = nil
+}
+
 func (m *Context) determineBounds() s2.Rect {
 	r := s2.EmptyRect()
 	for _, marker := range m.markers {
@@ -149,6 +160,9 @@ func (m *Context) determineBounds() s2.Rect {
 	}
 	for _, circle := range m.circles {
 		r = r.Union(circle.bounds())
+	}
+	for _, icon := range m.icons {
+		r = r.Union(icon.bounds())
 	}
 	return r
 }
@@ -378,6 +392,9 @@ func (m *Context) Render() (image.Image, error) {
 	for _, circle := range m.circles {
 		circle.draw(gc, trans)
 	}
+	for _, icon := range m.icons {
+		icon.draw(gc, trans)
+	}
 
 	// crop image
 	croppedImg := image.NewRGBA(image.Rect(0, 0, int(m.width), int(m.height)))
@@ -460,6 +477,9 @@ func (m *Context) RenderWithBounds() (image.Image, s2.Rect, error) {
 	}
 	for _, marker := range m.markers {
 		marker.draw(gc, trans)
+	}
+	for _, icon := range m.icons {
+		icon.draw(gc, trans)
 	}
 
 	// draw attribution
